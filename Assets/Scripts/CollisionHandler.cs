@@ -1,24 +1,21 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class CollisionHandler : MonoBehaviour
+public class CollisionHandler : MonoBehaviour   
 {
+    [SerializeField] float delayInvoke;
     void OnCollisionEnter(Collision collision)
     {
         switch (collision.gameObject.tag)
         {
-            case "Fuel":
-                Debug.Log("Picked up Fuel!");
-                break;
             case "Finish":
-                Debug.Log("Finished!");
+                StartNextScene();
                 break;
             case "Friendly":
                 Debug.Log("Game Start!");
                 break;
             default:
-                Debug.Log("Crashed!");
-                ReloadLevel();
+                StartCrashScene();
                 break;
         }
     }
@@ -27,5 +24,45 @@ public class CollisionHandler : MonoBehaviour
     {
         int currentScene = SceneManager.GetActiveScene().buildIndex;
         SceneManager.LoadScene(currentScene);
+    }
+
+    private void LoadLevel()
+    {
+        //Simple solution
+        // int currentScene = SceneManager.GetActiveScene().buildIndex;
+        // if(currentScene != 2)
+        // {
+        //     SceneManager.LoadScene(currentScene + 1);
+        // } else
+        // {
+        //     SceneManager.LoadScene(0);
+        // }
+
+        //More organized solution
+        int currentScene = SceneManager.GetActiveScene().buildIndex;
+        int nextScene = currentScene + 1;
+
+        if(nextScene == SceneManager.sceneCountInBuildSettings)
+        {
+            nextScene = 0;
+        }
+
+        SceneManager.LoadScene(nextScene);
+    }
+
+    private void StartCrashScene()
+    {
+        Debug.Log("Crashed!");
+        GetComponent<Movement>().enabled = false;
+        GetComponent<AudioSource>().enabled = false;
+        Invoke("ReloadLevel", delayInvoke);
+    }
+
+    private void StartNextScene()
+    {
+        Debug.Log("Finished!");
+        GetComponent<Movement>().enabled = false;
+        GetComponent<AudioSource>().enabled = false;
+        Invoke("LoadLevel", delayInvoke);
     }
 }
