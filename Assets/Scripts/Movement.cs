@@ -7,6 +7,11 @@ public class Movement : MonoBehaviour
     [SerializeField] InputAction rotation;
     [SerializeField] float thrustStrength = 1000f;
     [SerializeField] float rotationStrength = 100f;
+    [SerializeField] AudioClip mainEngine;
+    [SerializeField] ParticleSystem mainBooster;
+    [SerializeField] ParticleSystem leftBooster;
+    [SerializeField] ParticleSystem rightBooster;
+    // [SerializeField] float boosterDelay = .7f;
     AudioSource audioSource;
     Rigidbody rb;
 
@@ -31,19 +36,13 @@ public class Movement : MonoBehaviour
 
     private void ProcessThrust()
     {
-        if (thrust.IsPressed())
-        {
-            rb.AddRelativeForce(Vector3.up * thrustStrength * Time.fixedDeltaTime);
-            if (!audioSource.isPlaying)
-            {
-                audioSource.Play();
-            }
+        if (thrust.IsPressed()) 
+        {   
+            StartThrust();
         } else
         {
-            if (audioSource.isPlaying)
-            {
-                audioSource.Stop();
-            }
+           StopThrust();
+
         }
     }
 
@@ -55,18 +54,47 @@ public class Movement : MonoBehaviour
             //Rotate left
             if(rotationInput < 0)
             {   
-                rb.freezeRotation = true;
-                transform.Rotate(Vector3.forward * rotationStrength * Time.fixedDeltaTime);
-                rb.freezeRotation = false;
+                RotateLeft();
             } 
             //Rotate Right
             else if(rotationInput > 0)
             {
-                rb.freezeRotation = true;
-                transform.Rotate(Vector3.back * rotationStrength * Time.fixedDeltaTime);
-                rb.freezeRotation = false;
+                RotateRight();
             }
 
+        } else
+        {
+            leftBooster.Stop();
+            rightBooster.Stop();
         }
+    }
+
+    private void StartThrust()
+    {
+        rb.AddRelativeForce(Vector3.up * thrustStrength * Time.fixedDeltaTime);
+        mainBooster.Play();
+        if (!audioSource.isPlaying) audioSource.PlayOneShot(mainEngine);
+    }
+
+    private void StopThrust()
+    {
+        mainBooster.Stop();
+        if (audioSource.isPlaying) audioSource.Stop();
+    }
+
+    private void RotateLeft()
+    {
+        rb.freezeRotation = true;
+        transform.Rotate(Vector3.forward * rotationStrength * Time.fixedDeltaTime);
+        rb.freezeRotation = false;
+        rightBooster.Play();
+    }
+
+    private void RotateRight()
+    {
+        rb.freezeRotation = true;
+        transform.Rotate(Vector3.back * rotationStrength * Time.fixedDeltaTime);
+        rb.freezeRotation = false;
+        leftBooster.Play();
     }
 }

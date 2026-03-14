@@ -4,8 +4,23 @@ using UnityEngine.SceneManagement;
 public class CollisionHandler : MonoBehaviour   
 {
     [SerializeField] float delayInvoke;
+    [SerializeField] AudioClip crashSound;
+    [SerializeField] AudioClip stageCompleteSound;
+    [SerializeField] ParticleSystem stageCompleteParticles;
+    [SerializeField] ParticleSystem crashParticles;
+
+    AudioSource audioSource;
+    bool isPlayable = true;
+
+
+    void Start()
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
+
     void OnCollisionEnter(Collision collision)
     {
+        if(!isPlayable) return;
         switch (collision.gameObject.tag)
         {
             case "Finish":
@@ -54,7 +69,11 @@ public class CollisionHandler : MonoBehaviour
     {
         Debug.Log("Crashed!");
         GetComponent<Movement>().enabled = false;
-        GetComponent<AudioSource>().enabled = false;
+        audioSource.Stop();
+        audioSource.PlayOneShot(crashSound);
+        crashParticles.Play();
+        isPlayable = false;
+        
         Invoke("ReloadLevel", delayInvoke);
     }
 
@@ -62,7 +81,11 @@ public class CollisionHandler : MonoBehaviour
     {
         Debug.Log("Finished!");
         GetComponent<Movement>().enabled = false;
-        GetComponent<AudioSource>().enabled = false;
+        audioSource.Stop();
+        audioSource.PlayOneShot(stageCompleteSound);
+        stageCompleteParticles.Play();
+        isPlayable = false;
+
         Invoke("LoadLevel", delayInvoke);
     }
 }
