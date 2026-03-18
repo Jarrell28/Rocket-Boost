@@ -11,6 +11,7 @@ public class CollisionHandler : MonoBehaviour
 
     AudioSource audioSource;
     bool isPlayable = true;
+    bool isCollidable = true;
 
 
     void Start()
@@ -21,6 +22,7 @@ public class CollisionHandler : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
         if(!isPlayable) return;
+        if(!isCollidable) return;
         switch (collision.gameObject.tag)
         {
             case "Finish":
@@ -33,6 +35,11 @@ public class CollisionHandler : MonoBehaviour
                 StartCrashScene();
                 break;
         }
+    }
+
+    void Update()
+    {
+        RespondToDebugKeys();
     }
 
     private void ReloadLevel()
@@ -88,4 +95,11 @@ public class CollisionHandler : MonoBehaviour
 
         Invoke("LoadLevel", delayInvoke);
     }
+
+    private void RespondToDebugKeys()
+    {
+        if(Input.GetKeyDown("l")) LoadLevel();
+        if(Input.GetKeyDown("c")) isCollidable = !isCollidable;
+    }
+       
 }
